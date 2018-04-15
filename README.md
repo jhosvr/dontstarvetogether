@@ -4,8 +4,9 @@ Project for setting up a DST server on a linux box
 Currently this is meant for Gentoo/Funtoo boxes
 
 ## Pre-requisites
-linux operating system, gentoo-based distribution 
-packages are installed: 
+linux operating system, gentoo-based distribution
+
+the following packages are installed: 
 * layman:steam-overlay
 * steam-launcher
 * liberation-fonts
