@@ -20,3 +20,12 @@ initially, this will be a setup following the guide from the klei dst dedicated 
 * rebuild start script to generate config files upon start
 * make use of an externalized mod list file so that it easy to add and remove mods
 * find a workflow to package and containerize the installation in an extremely lightweight manner for portability onto other linux distributions
+
+
+# Setting up a new server
+Please follow these steps in order to setup a new server
+1. Copy the file conf/default.conf into a file with the intended name of your server
+..* Example: 
+```cp -v conf/default.conf conf/MyDSTserver.conf```
+..* Note: All config files should be kept in the conf folder
+2. Run the setupNewServer.sh script
