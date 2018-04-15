@@ -24,10 +24,10 @@ initially, this will be a setup following the guide from the klei dst dedicated 
 
 # Setting up a new server
 Please follow these steps in order to setup a new server
-1. Copy the file conf/default.conf into a file with the intended name of your server 
+1. Copy the file conf/default.conf into a file with the intended name of your server
 
-```cp -v conf/default.conf conf/MyDSTserver.conf```
+    ```cp -v conf/default.conf conf/MyDSTserver.conf``` 
 
-    * Note: All config files should be kept in the conf folder 
+    *Note: All config files should be kept in the conf folder 
 
 2. Run the setupNewServer.sh script
