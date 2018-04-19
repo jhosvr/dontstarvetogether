@@ -1,0 +1,32 @@
+source <(sed -n '/#### SECTION: server\/cluster.ini/,/# SECTION: .*/p' ../conf/default.conf)
+echo "
+[GAMEPLAY]
+game_mode = $game_mode
+max_players = $max_players
+pvp = $pvp
+pause_when_empty = $pause_when_empty
+vote_enabled = $vote_enabled
+
+[NETWORK]
+offline_cluster = $offline_cluster
+cluster_description = $cluster_description
+cluster_name = \"$cluster_name\"
+cluster_intention = $cluster_intention
+cluster_password = $cluster_password
+tick_rate = $tick_rate
+whitelist_slots = $whitelist_slots
+lan_only_cluster = $lan_only_cluster
+auto_saver_enabled = $auto_saver_enabled
+
+[MISC]
+console_enabled = $console_enabled
+max_snapshots = $max_snapshots
+
+[SHARD]
+shard_enabled = $shard_enabled
+bind_ip = $bind_ip
+master_ip = $master_ip
+master_port = $master_port
+cluster_key = $cluster_key
+" > testResults
+
