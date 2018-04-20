@@ -5,33 +5,45 @@
 # date: 20180419
 # description: installs steamcmd and Klei's Do Not Starve Together
 
-checkBin() { if ! which "${1}" 2>/dev/null; then echo "ERROR: ${1} package not found. Please make sure it is installed."; fi; }
+usage() {
+echo "$0 : installs steam-cmd and Klei's Don't Starve Together
+  optional arguments:
+    -cmd : designate a different directory to install steamcmd (default: $HOME/steamcmd)
+    -dst : designate a different directory to install DST (default: $HOME/DoNotStarveTogether)"
+}
 
 #### DEFAULT VARIABLES
-steamcmd="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
-steamBase=$HOME/steamcmd
-kleiBase=$HOME/.klei
+cmdUrl="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
+cmd="$(echo "$cmdUrl" | rev | cut -d'/' -f1 | rev)"
+cmdBase="$HOME/steamcmd"
+dstBase="$HOME/.klei/DoNotStarveTogehter"
 
 #### OVERRIDES
 
 while [[ ! -z "${1}" ]]; do
   case "${1}" in
-    "-steam"
-
-#### EXECUTION CHECKS
-checkBin wget
-checkBin 
+    "-cmd")
+        cmdBase="${2}"
+        shift; shift;;
+    "-dst")
+        dstBase="${2}"
+        shift; shift;;
+    "-help"|"--help"|"-?")
+        usage
+        exit 0 ;;
+  esac
+done
 
 #### SCRIPT EXECUTION
 
 # install steamCMD
-echo "Installing Steam-cmd at $steamBase"
-mkdir -p "$steamBase"
-cd "$steamBase"
-wget "$steamcmd"
-tar -xvzf $(echo "$steamcmd" | rev | cut -d'/' -f1 | rev)
+echo "Installing Steam-cmd at $cmdBase"
+mkdir -p "$cmdBase"
+cd "$cmdBase"
+wget "$cmdUrl" || (echo "unable to get $cmdUrl" && exit 1)
+tar -xvzf "$cmd"
 
 # install Don't Starve Together
-echo "Installing \"Don't Starve Together\" at $kleiBase"
-$steamBase/steamcmd.sh +force_install_dir "$kleiBase" +login anonymous +app_update 343050 validate +quit
+echo "Installing \"Don't Starve Together\" at $dstBase"
+$cmdBase/steamcmd.sh +force_install_dir "$dstBase" +login anonymous +app_update 343050 validate +quit
 
