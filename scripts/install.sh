@@ -9,12 +9,12 @@ usage() {
 echo "$0 : installs steam-cmd and Klei's Don't Starve Together
   optional arguments:
     -cmd : designate a different directory to install steamcmd (default: $HOME/steamcmd)
-    -dst : designate a different directory to install DST (default: $HOME/DoNotStarveTogether)"
+    -dst : designate a different directory to install DST (default: $HOME/.klei/DoNotStarveTogether)"
 }
 
 #### DEFAULT VARIABLES
 cmdUrl="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
-cmd="$(echo "$cmdUrl" | rev | cut -d'/' -f1 | rev)"
+cmd="$(echo "$cmdUrl" | awk -F'/' '{print $NF}')"
 cmdBase="$HOME/steamcmd"
 dstBase="$HOME/.klei/DoNotStarveTogehter"
 
@@ -40,7 +40,7 @@ done
 echo "Installing Steam-cmd at $cmdBase"
 mkdir -p "$cmdBase"
 cd "$cmdBase"
-wget "$cmdUrl" || (echo "unable to get $cmdUrl" && exit 1)
+wget "$cmdUrl" || (echo "unable to retrieve $cmd from $cmdUrl" && exit 1)
 tar -xvzf "$cmd"
 
 # install Don't Starve Together
