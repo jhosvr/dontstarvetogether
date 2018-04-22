@@ -83,8 +83,12 @@ fi
 ####
 dir_dstserver="${dir_dst}"/"${serverName}"
 
-install_steamcmd || fail
-install_dst || fail
+fileNotFound "${dir_cmd}/steamcmd.sh" \
+  "WARNING: steamcmd.sh was not found in ${dir_cmd}, installing Steam-cmd" \
+  install_steamcmd || fail
+dirNotFound "${dir_dst}" \
+  "WARNING: Folder ${dir_dst} was not found, installing don't starve together at ${dir_dst}" \
+  install_dst || fail
 create_dstserver_folders || fail
 generate_cluster_token || fail
 generate_server_cluster_ini || fail

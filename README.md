@@ -22,8 +22,9 @@ This means that both Steam and Don't Starve Togther have not yet been installed 
 
 1. Clone this repository
 2. Go to the scripts directory
-3. Run the install.sh script
-4. Run the setupServer.sh script
+3. Run the setupServer.sh script
+
+The above steps will create a start server script called "DST-Server.sh" in the user's home folder, install steamcmd to $HOME/steamcmd, install Don't Starve Together at $HOME/.klei and create the configuration files at $HOME/.klei/DoNotStarveTogether/DST-Server
 
 # Setting up a new server with custom settings
 Please follow these steps in order to setup a custom server
@@ -43,6 +44,5 @@ initially, this will be a setup following the guide from the klei dst dedicated 
 
 Upcoming work in Scope:
 * externalize mod list file so that it easy to add and remove mods
-* build startServer scripts
 * add in additional checks for conflicting port settings within a server cluster
 * find a workflow to package and containerize the installation in an extremely lightweight manner for portability onto other linux distributions
