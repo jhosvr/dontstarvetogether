@@ -163,6 +163,7 @@ echo "return {
 
 generate_server_script() {
   scriptName="${cluster_name// /_}"
+  startScript="${HOME}/$scriptName.sh"
   step="[generate: server start script] Generating $scriptName"
   echo "${step}"
 echo "#!/bin/bash
@@ -190,9 +191,8 @@ fileSearch \"${dir_dstserver}/Caves/server.ini\"
 
 ./steamcmd.sh +force_install_dir \"${dir_dst}\" +login anonymous +app_update 343050 validate +quit
 
-check_for_file \"${dir_dstserver}\"/bin
-
-cd \"${dir_dstserver}\"/bin || fail
+fileSearch \"${dir_dstserver}\"/bin
+cd \"${dir_dstserver}/bin\" || fail \"could not find \"${dir_dstserver}/bin\"
 
 run_shared=(./dontstarve_dedicated_server_nullrenderer)
 run_shared+=(-console)
@@ -201,6 +201,7 @@ run_shared+=(-monitor_parent_process \$\$)
 
 \${run_shared[@]} -shard Caves  | sed 's/^/Caves:  /' &
 \${run_shared[@]} -shard Master | sed 's/^/Master: /'
-" > "${HOME}/$scriptName.sh"
+" > "${startScript}"
+chmod +x "${startScript}"
 }
 
