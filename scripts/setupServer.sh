@@ -89,6 +89,7 @@ fileNotFound "${dir_cmd}/steamcmd.sh" \
 dirNotFound "${dir_dst}" \
   "WARNING: Folder ${dir_dst} was not found, installing don't starve together at ${dir_dst}" \
   install_dst || fail
+
 create_dstserver_folders || fail
 generate_cluster_token || fail
 generate_server_cluster_ini || fail
