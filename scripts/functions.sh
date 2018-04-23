@@ -226,8 +226,8 @@ fileSearch \"${dir_dstserver}/Caves/server.ini\"
 ${dir_dstserver}/generate_mod_configs.sh
 
 # Find DST binaries
-fileSearch \"${dir_dstserver}\"/bin
-cd \"${dir_dstserver}/bin\" || fail \"could not find \"${dir_dstserver}/bin\"
+fileSearch \"${dir_dstserver}/bin\"
+cd \"${dir_dstserver}/bin\" || fail \"could not find ${dir_dstserver}/bin\"
 
 # Start DST
 run_shared=(./dontstarve_dedicated_server_nullrenderer)
