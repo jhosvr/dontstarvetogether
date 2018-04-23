@@ -22,6 +22,8 @@ source functions.sh
 dir_dst="$HOME/.klei/DoNotStarveTogether"
 dir_cmd="$HOME/steamcmd"
 dir_current=$(pwd)
+dir_mods=$(find $HOME -type d -wholename *Don\'t\ Starve\ Together\ Dedicated\ Server/mods)
+modlistfile="../conf/mods.list"
 url_cmd="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
 cmd=$(echo $url_cmd | awk -F'/' '{print $NF}')
 dstconf="../conf/default.conf"
@@ -81,7 +83,7 @@ fi
 ####
 #### SCRIPT EXECUTION
 ####
-dir_dstserver="${dir_dst}"/"${serverName}"
+dir_dstserver="${dir_dst}"/"${cluster_name}"
 
 fileNotFound "${dir_cmd}/steamcmd.sh" \
   "WARNING: steamcmd.sh was not found in ${dir_cmd}, installing Steam-cmd" \
@@ -96,4 +98,5 @@ generate_server_cluster_ini || fail
 generate_master_server_ini || fail
 generate_caves_server_ini || fail
 generate_caves_worldgen || fail
+generate_mod_scripts || fail
 generate_server_script || fail
