@@ -33,6 +33,16 @@ create_symlinks() {
   cd "${dstgamedir}/bin/lib32"
   rm -f steamclient.so
   ln -sf "${steamcmddir}/linux32/steamclient.so" "steamclient.so"
+
+  if [[ ! -L "${base}/servers" ]]; then
+    if [[ -d "${base}/servers" ]]; then
+      echo "${step} ${base}/servers is a directory, renaming to ${base}/servers-$(date +%Y%m%d-%H%M)"
+      mv "${base}/servers" "${base}/servers-$(date +%Y%m%d-%H%M)"
+    fi
+    echo "${step} creating DST server configs symlinks"
+    cd ${base}
+    ln -sf "$HOME/.klei/DoNotStarveTogether" servers
+  fi
 }
 
 install_steamcmd() {

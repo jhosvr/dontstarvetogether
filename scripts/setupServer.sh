@@ -114,8 +114,8 @@ fileNotFound "${dstgamedir}" \
   "install_dst || fail"
 
 # Create folder structures and links
-create_dstserver_folders || fail
 create_symlinks || fail
+create_dstserver_folders || fail
 
 # Generate server configuration files
 generate_cluster_token || fail
