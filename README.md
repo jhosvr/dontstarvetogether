@@ -1,10 +1,10 @@
 # dontstarvetogether
 Project for easy set up and configuration of a Don't Starve Together Dedicated Server on a linux box
 
-Currently this has been created on/for gentoo-based boxes (specifically funtoo servers)
+Currently this has been created on/for gentoo-based boxes (specifically funtoo compute servers)
 
 ## Pre-requisites
-On a 64-bit system, 32-bit support is added and the following libraries are installed:
+On a 64-bit system, 32-bit support is added and the following libraries are installed (required for steamcmd):
 
 * libstdc++6:i386
 * libgcc1:i386
@@ -27,11 +27,11 @@ This means that both Steam and Don't Starve Togther have not yet been installed 
 The above steps will do the following:
 
 * Create all necessary files for a DST server in the base folder $HOME/dst-server, which includes:
-  * Installs steamcmd to dst-server/steamcmd
-  * Installs DST to dst-server/dst
-  * Generates server configs for a server "dstserver01" in dst-server/servers/dstserver01
-  * Generates a mod list saved at dst-server/servers/dstserver01
-  * Generates a start server script, which at runtime will update the game and generate necessary mod config files
+    * Installs steamcmd to dst-server/steamcmd
+    * Installs DST to dst-server/dst
+    * Generates server configs for a server "dstserver01" in dst-server/servers/dstserver01
+    * Generates a mod list saved at dst-server/servers/dstserver01
+    * Generates a start server script, which at runtime will update the game and generate necessary mod config files
 
 # Setting up a new server with custom settings
 Please follow these steps in order to setup a custom server
@@ -43,7 +43,6 @@ Please follow these steps in order to setup a custom server
     ``` 
     * Note: All config files should be kept in the conf folder and their file names should end with ".conf"
 2. Run the setupServer.sh script with the "-conf" parameter of the new server
-  * example:
     ```
     cp -v conf/default.conf conf/MyOwnServer.conf
     ./setupServer.sh -conf MyOwnServer.conf
@@ -51,7 +50,7 @@ Please follow these steps in order to setup a custom server
 
 ## Features to still add
 
-Upcoming work in Scope:
+Upcoming work in scope:
 * add in additional checks for conflicting port settings within a server cluster
 * add in additional checks for pre-requisite libraries, and install if needed
   * Debian-based distributions
