@@ -1,5 +1,5 @@
 # dontstarvetogether
-Project for setting up a DST server on a linux box
+Project for easy set up and configuration of a Don't Starve Together Dedicated Server on a linux box
 
 Currently this has been created on/for gentoo-based boxes (specifically funtoo servers)
 
@@ -24,7 +24,14 @@ This means that both Steam and Don't Starve Togther have not yet been installed 
 2. Go to the scripts directory
 3. Run the setupServer.sh script
 
-The above steps will create a start server script called "DST-Server.sh" in the user's home folder, install steamcmd to $HOME/steamcmd, install Don't Starve Together at $HOME/.klei and create the configuration files at $HOME/.klei/DoNotStarveTogether/DST-Server
+The above steps will do the following:
+
+* Create all necessary files for a DST server in the base folder $HOME/dst-server, which includes:
+  * Installs steamcmd to dst-server/steamcmd
+  * Installs DST to dst-server/dst
+  * Generates server configs for a server "dstserver01" in dst-server/servers/dstserver01
+  * Generates a mod list saved at dst-server/servers/dstserver01
+  * Generates a start server script, which at runtime will update the game and generate necessary mod config files
 
 # Setting up a new server with custom settings
 Please follow these steps in order to setup a custom server
@@ -32,17 +39,23 @@ Please follow these steps in order to setup a custom server
 1. Copy the file conf/default.conf into a file with the intended name of your server
 
     ```
-    cp -v conf/default.conf conf/MyDSTserver.conf
+    cp -v conf/default.conf conf/MyOwnServer.conf
     ``` 
     * Note: All config files should be kept in the conf folder and their file names should end with ".conf"
 2. Run the setupServer.sh script with the "-conf" parameter of the new server
+  * example:
+    ```
+    cp -v conf/default.conf conf/MyOwnServer.conf
+    ./setupServer.sh -conf MyOwnServer.conf
+    ``` 
 
-## Workflow
-
-initially, this will be a setup following the guide from the klei dst dedicated server forums  
-[Dedicated Server Quick Setup Guide - Linux](https://forums.kleientertainment.com/topic/64441-dedicated-server-quick-setup-guide-linux/)
+## Features to still add
 
 Upcoming work in Scope:
-* externalize mod list file so that it easy to add and remove mods
 * add in additional checks for conflicting port settings within a server cluster
-* find a workflow to package and containerize the installation in an extremely lightweight manner for portability onto other linux distributions
+* add in additional checks for pre-requisite libraries, and install if needed
+  * Debian-based distributions
+  * Rpm based distributions
+  * Arch based distributions
+
+When this repository is fleshed out with the above features, I will start looking into creating a python version for portability onto other systems (Windows, Mac)
