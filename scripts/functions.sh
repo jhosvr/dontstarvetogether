@@ -10,8 +10,6 @@
 ####
 
 fail() { echo "${step} ERROR: ${1}" >&2; exit 1; }
-dirFound() { if [[ -d "${1}" ]]; then echo "${2}"; ${3}; fi; }
-dirNotFound() { if [[ ! -d "${1}" ]]; then echo "${2}"; ${3}; fi; }
 fileNotFound() { if [[ ! -e "${1}" ]]; then echo "${2}"; ${3}; fi; }
 fileFound() { if [[ -e "${1}" ]]; then echo "${2}"; ${3}; fi; }
 varNotSet() { if [[ -z "${1}" ]]; then echo "${2}"; ${3}; fi; }
