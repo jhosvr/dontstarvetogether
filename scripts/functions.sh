@@ -214,7 +214,7 @@ fileSearch \"${dstserverbase}/Caves/server.ini\"
 ./steamcmd.sh +force_install_dir \"${dstgamedir}\" +login anonymous +app_update 343050 validate +quit
 
 # generate necessary mod configs
-${dstserverbase}/generate_mod_configs.sh || fail \"could not generate mod config files\"
+${dstserverbase}/generate_mods_configs.sh || fail \"could not generate mod config files\"
 
 # Find DST binaries
 fileSearch \"${dstgamedir}/bin\"
