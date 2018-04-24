@@ -11,7 +11,7 @@ echo "$0 : creates folders and base configuration files for a don't starve dedic
   -base: specify a different base location for installations. default: ${base}
   -dst : specify a different installation directory of DST Server configs. default: ${dstserverdir}
   -cmd : specify a different installation of steamcmd. default: ${steamcmddir}
-  -conf: configuration file located in the conf folder. default: ${dstconf}
+  -conf: configuration file located in the conf folder. default: default.conf
 "
 }
 
@@ -35,8 +35,8 @@ modsdir="${dstgamedir}/mods"
 
 # dont starve server variables
 dstserverdir="${base}/servers"
-dstconf="../conf/default.conf"
-modsfile="../conf/mods.list"
+dstconf="${workdir}/../conf/default.conf"
+modsfile="${workdir}/../conf/mods.list"
 
 ####
 #### OVERRIDES
@@ -56,7 +56,7 @@ while [[ ! -z "${1}" ]]; do
         steamcmddir="${2}"
         shift; shift;;
     "-conf")
-        dstconf="../conf/${2}"
+        dstconf="${workdir}/../conf/${2}"
         shift; shift;;
     "-h"|"-help"|"-?")
         usage && exit ;;
@@ -117,11 +117,13 @@ fileNotFound "${dstgamedir}" \
 create_dstserver_folders || fail
 create_symlinks || fail
 
-# Generate configuration files
+# Generate server configuration files
 generate_cluster_token || fail
 generate_server_cluster_ini || fail
 generate_master_server_ini || fail
 generate_caves_server_ini || fail
 generate_caves_default_worldgen || fail
+
+# Generate script files
 generate_mods_scripts || fail
 generate_server_script || fail

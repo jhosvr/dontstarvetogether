@@ -187,7 +187,7 @@ chmod +x "${dstserverbase}/generate_mods_configs.sh"
 generate_server_script() {
   scriptName="${cluster_name// /_}"
   startScript="${base}/start$scriptName.sh"
-  step="[generate: server start script] Generating $scriptName"
+  step="[generate: server start script] Generating start script start$scriptName.sh"
   echo "${step}"
 echo "#!/bin/bash
 # name: $scriptName.sh
