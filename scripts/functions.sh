@@ -29,11 +29,6 @@ create_dstserver_folders() {
 
 create_symlinks() {
   step="[create: symlinks]"
-  echo "${step} removing DST's deprecated steamclient.so and linking to updated steamcmd version"
-  cd "${dstgamedir}/bin/lib32"
-  rm -f steamclient.so
-  ln -sf "${steamcmddir}/linux32/steamclient.so" "steamclient.so"
-
   if [[ ! -L "${base}/servers" ]]; then
     if [[ -d "${base}/servers" ]]; then
       echo "${step} ${base}/servers is a directory, renaming to ${base}/servers-$(date +%Y%m%d-%H%M)"
@@ -223,8 +218,14 @@ fileSearch \"${dstserverbase}/Caves/server.ini\"
 # Update DST via steam cmd
 ./steamcmd.sh +force_install_dir \"${dstgamedir}\" +login anonymous +app_update 343050 validate +quit
 
+# Update deprecated symlinks
+cd \"${dstgamedir}/bin/lib32\"
+rm -f steamclient.so
+ln -sf \"${steamcmddir}/linux32/steamclient.so\" \"steamclient.so\"
+
 # generate necessary mod configs
-${dstserverbase}/generate_mods_configs.sh || fail \"could not generate mod config files\"
+cd \"${dstserverbase}\"
+\"${dstserverbase}/generate_mods_configs.sh\" || fail \"could not generate mod config files\"
 
 # Find DST binaries
 fileSearch \"${dstgamedir}/bin\"
