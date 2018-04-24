@@ -8,9 +8,10 @@
 usage() {
 echo "$0 : creates folders and base configuration files for a don't starve dedicated server. defaults will be used if optional arguments are not specified.
   optional arguments
-  -dstdir : specify a different installation directory of DST. default: $HOME/.klei/DoNotStarveTogether
-  -cmddir : specify a different installation of steamcmd. default: $HOME/steamcmd
-  -dstconf: configuration file located in the conf folder. default: ../conf/default.conf
+  -base: specify a different base location for installations. default: ${base}
+  -dst : specify a different installation directory of DST Server configs. default: ${dstserverdir}
+  -cmd : specify a different installation of steamcmd. default: ${steamcmddir}
+  -conf: configuration file located in the conf folder. default: ${dstconf}
 "
 }
 
@@ -18,15 +19,24 @@ echo "$0 : creates folders and base configuration files for a don't starve dedic
 #### DEFAULT VARIABLES
 ####
 source functions.sh
+workdir=$(pwd)
 
-dir_dst="$HOME/.klei/DoNotStarveTogether"
-dir_cmd="$HOME/steamcmd"
-dir_current=$(pwd)
-dir_mods=$(find $HOME -type d -wholename *Don\'t\ Starve\ Together\ Dedicated\ Server/mods)
-modlistfile="../conf/mods.list"
-url_cmd="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
-cmd=$(echo $url_cmd | awk -F'/' '{print $NF}')
+# base directory for installations
+base="${HOME}/dst-server"
+
+# steam cmd variables
+steamcmddir="${base}/steamcmd"
+steamcmdurl="https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz"
+steamcmdpkg=$(echo "${steamcmdurl}"|awk -F'/' '{print $NF}')
+
+# dont starve game variables
+dstgamedir="${base}/dst"
+modsdir="${dstgamedir}/mods"
+
+# dont starve server variables
+dstserverdir="${base}/servers"
 dstconf="../conf/default.conf"
+modsfile="../conf/mods.list"
 
 ####
 #### OVERRIDES
@@ -36,13 +46,16 @@ step="[override variables]"
 
 while [[ ! -z "${1}" ]]; do
   case "${1}" in
-    "-dstdir")
-        dir_dst="${2}"
+    "-base")
+        base="${2}"
         shift; shift;;
-    "-cmddir")
-        dir_cmd="${2}"
+    "-dst")
+        dstserverdir="${2}"
         shift; shift;;
-    "-dstconf")
+    "-cmd")
+        steamcmddir="${2}"
+        shift; shift;;
+    "-conf")
         dstconf="../conf/${2}"
         shift; shift;;
     "-h"|"-help"|"-?")
@@ -54,49 +67,61 @@ done
 ####
 #### EXECUTION CHECKS
 ####
+
 step="[execution-checks]"
 
-# Check for existing folders and directories
+fileNotFound "${base}" \
+  "${step} INFO: Base directory ${base} not found, creating directory" \
+  "mkdir -p ${base}"
+
+fileNotFound "${steamcmddir}" \
+  "${step} INFO: Steam-cmd directory ${steamcmddir} not found, creating directory" \
+  "mkdir -p ${steamcmddir}"
+
 fileNotFound "${dstconf}" \
-  "ERROR: unable to locate conf file ${dstconf}" \
-  "exit 1"
-dirNotFound "${dir_dst}" \
-  "ERROR: The folder ${dir_dst} does not exist. Please install the game or specify another location with the -base parameter." \
+  "${step} ERROR: unable to locate conf file ${dstconf}, please make sure it exists." \
   "exit 1"
 
-# Check cluster token
 cluster_token=$(grep "cluster_token=" "${dstconf}" | awk -F'=' '{print $2}')
-isEmpty "${cluster_token}" \
-  "ERROR: cluster_token variable was not set. Please check ${dstconf}, the token is required to run a server." \
+varNotSet "${cluster_token}" \
+  "${step} ERROR: cluster_token has not been set. Please check ${dstconf}, the token is required to run a server." \
   "exit 1"
 
-# Check if server already exists
 cluster_name=$(grep "cluster_name=" "${dstconf}" | awk -F'=' '{print $2}')
-dirFound "${dir_dst}/${cluster_name}" \
-  "ERROR: ${dir_dst}/${cluster_name} already exists. This script will exit so it does not harm any existing files." \
-  "exit 1"
+fileFound "${dstserverdir}/${cluster_name}" \
+  "${step} INFO: ${dstserverdir}/${cluster_name} already exists. Renaming this to ${dstserverdir}/${cluster_name}_$(date +%Y%m%d-%H%M)" \
+  "mv ${dstserverdir}/${cluster_name} ${dstserverdir}/${cluster_name}_$(date +%Y%m%d-%H%M)"
 
 if [[ "${dstconf}" == "../conf/default.conf" ]]; then
-  echo "WARNING: a seperate conf file was not specified. Applying defaults."
+  echo "${step} INFO: a seperate conf file was not specified. Defaults will be applied."
 fi
 
 ####
 #### SCRIPT EXECUTION
 ####
-dir_dstserver="${dir_dst}"/"${cluster_name}"
 
-fileNotFound "${dir_cmd}/steamcmd.sh" \
-  "WARNING: steamcmd.sh was not found in ${dir_cmd}, installing Steam-cmd" \
-  install_steamcmd || fail
-dirNotFound "${dir_dst}" \
-  "WARNING: Folder ${dir_dst} was not found, installing don't starve together at ${dir_dst}" \
-  install_dst || fail
+dstserverbase="${dstserverdir}/${cluster_name}"
 
+# Install steamcmd and DST
+step="[install: steam cmd]"
+fileNotFound "${steamcmddir}/steamcmd.sh" \
+  "${step} INFO: steamcmd.sh was not found in ${steamcmddir}, installing Steam-cmd" \
+  "install_steamcmd || fail"
+
+step="[install: don't starve together]"
+fileNotFound "${dstgamedir}" \
+  "${step} INFO: DST game directory ${dstgamedir} was not found, installing don't starve together at ${dstgamedir}" \
+  "install_dst || fail"
+
+# Create folder structures and links
 create_dstserver_folders || fail
+create_symlinks || fail
+
+# Generate configuration files
 generate_cluster_token || fail
 generate_server_cluster_ini || fail
 generate_master_server_ini || fail
 generate_caves_server_ini || fail
-generate_caves_worldgen || fail
-generate_mod_scripts || fail
+generate_caves_default_worldgen || fail
+generate_mods_scripts || fail
 generate_server_script || fail

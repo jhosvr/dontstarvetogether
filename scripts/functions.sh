@@ -9,78 +9,71 @@
 #### Error checking functions. Parameter format is $1=object $2=message-to-return $3=action-to-take
 ####
 
-fail() {
-  echo "${step} ERROR: ${1}" >&2
-  exit 1
-}
+fail() { echo "${step} ERROR: ${1}" >&2; exit 1; }
+dirFound() { if [[ -d "${1}" ]]; then echo "${2}"; ${3}; fi; }
+dirNotFound() { if [[ ! -d "${1}" ]]; then echo "${2}"; ${3}; fi; }
+fileNotFound() { if [[ ! -e "${1}" ]]; then echo "${2}"; ${3}; fi; }
+fileFound() { if [[ -e "${1}" ]]; then echo "${2}"; ${3}; fi; }
+varNotSet() { if [[ -z "${1}" ]]; then echo "${2}"; ${3}; fi; }
 
-fileNotFound() {
-if [[ ! -f "${1}" ]]; then
-  echo "${2}"
-  ${3}
-fi
-}
-
-dirNotFound() {
-if [[ ! -d "${1}" ]]; then
-  echo "${2}"
-  ${3}
-fi
-}
-
-dirFound() {
-if [[ -d "${1}" ]]; then
-  echo "${2}"
-  ${3}
-fi
-}
-
-isEmpty() {
-if [[ -z "${1}" ]]; then
-  echo "${2}"
-  ${3}
-fi
-}
 
 ####
-#### Installation functions
+#### Create structure and installation functions
 ####
+
+
+create_dstserver_folders() {
+  step="[create: dst server folders]"
+  echo "${step} Creating dst server instance folders"
+  mkdir -p "${dstserverbase}/Master"
+  mkdir -p "${dstserverbase}/Caves"
+}
+
+create_symlinks() {
+  step="[create: symlinks]"
+  echo "${step} removing DST's deprecated steamclient.so and linking to updated steamcmd version"
+  cd "${dstgamedir}/bin/lib32"
+  rm -f steamclient.so
+  ln -sf "${steamcmddir}/linux32/steamclient.so" "steamclient.so"
+}
 
 install_steamcmd() {
   step="[install: steam cmd]"
-  mkdir -p "$dir_cmd"
-  cd "$dir_cmd"
-  wget "$url_cmd" || fail "could not get $cmd from $url_cmd"
-  tar -xvzf "$cmd"
-  cd "${dir_current}"
+  cd "${steamcmddir}"
+
+  echo "${step} retrieving steam cmd package"
+  wget -q "${steamcmdurl}" || fail "could not get ${steamcmdpkg} from ${steamcmdurl}"
+
+  echo "${step} extracting steam cmd package"
+  tar -xzf "${steamcmdpkg}" || fail "could not extract steamcmd installation"
+
+  echo "${step} removing no longer needed steam cmd tarball"
+  rm "${steamcmdpkg}"
+  cd "${workdir}"
 }
 
 install_dst() {
   step="[install: don't starve together]"
-  $dir_cmd/steamcmd.sh +force_install_dir "$dir_dst" +login anonymous +app_update 343050 validate +quit || fail "error installing don't starve together"
+  echo
+  ${steamcmddir}/steamcmd.sh +force_install_dir "${dstgamedir}" +login anonymous +app_update 343050 validate +quit
+  echo
 }
 
-create_dstserver_folders() {
-  step="[generate: dst server folders]"
-  source <(sed -n '/#### SECTION: server\/cluster.ini/,/#### SECTION: .*/p' "${dstconf}")
-  echo "${step} Creating dst server instance folders"
-  mkdir -p "${dir_dstserver}"/Master
-  mkdir -p "${dir_dstserver}"/Caves
-}
 
 ####
 #### File generation functions
 ####
 
+
 generate_cluster_token() {
   step="[generate: cluster token]"
   echo "${step} Creating cluster token file"
-  echo "${cluster_token}" > "${dir_dstserver}/cluster_token.txt"
+  echo "${cluster_token}" > "${dstserverbase}/cluster_token.txt"
 }
 
 generate_server_cluster_ini() {
   step="[generate: cluster.ini]"
-  source <(sed -n '/#### SECTION: server\/cluster.ini/,/#### SECTION: .*/p' "${dstconf}")
+  source <(sed -n '/\[section: server\/cluster.ini\]/,/\[section: .*\]/p' "${dstconf}")
   echo "${step} Generating ${cluster_name}/cluster.ini"
   echo "[GAMEPLAY]
 game_mode = $game_mode
@@ -110,14 +103,14 @@ bind_ip = $bind_ip
 master_ip = $master_ip
 master_port = $master_port
 cluster_key = $cluster_key
-" > "${dir_dstserver}"/cluster.ini
+" > "${dstserverbase}/cluster.ini"
 }
 
 
 generate_master_server_ini() {
   step="[generate: master/server.ini]"
   echo "${step} Generating Master/server.ini"
-  source <(sed -n '/#### SECTION: server\/Master\/server.ini/,/#### SECTION: .*/p' "${dstconf}")
+  source <(sed -n '/\[section: server\/Master\/server.ini\]/,/\[section: .*\]/p' "${dstconf}")
 echo "[NETWORK]
 server_port = $server_port
 
@@ -129,13 +122,13 @@ id = $id
 [STEAM]
 master_server_port = $master_server_port
 authentication_port = $authentication_port
-" > "${dir_dstserver}"/Master/server.ini
+" > "${dstserverbase}/Master/server.ini"
 }
 
 generate_caves_server_ini() {
   step="[generate: caves/server.ini]"
   echo "${step} Generating Caves/server.ini"
-  source <(sed -n '/#### SECTION: server\/Caves\/server.ini/,/#### SECTION: .*/p' "${dstconf}")
+  source <(sed -n '/\[section: server\/Caves\/server.ini\]/,/\[section: .*\]/p' "${dstconf}")
 echo "[NETWORK]
 server_port = $server_port
 
@@ -147,53 +140,53 @@ id = $id
 [STEAM]
 master_server_port = $master_server_port
 authentication_port = $authentication_port
-" > "${dir_dstserver}"/Caves/server.ini
+" > "${dstserverbase}/Caves/server.ini"
 
 }
 
-generate_caves_worldgen() {
+generate_caves_default_worldgen() {
   step="[generate: caves/worldgen]"
 echo "${step} Generating Caves/worldgenoverride.lua"
 echo "return {
   override_enabled = true,
   preset = "DST_CAVE",
 }
-" > "${dir_dstserver}"/Caves/worldgenoverride.lua
+" > "${dstserverbase}/Caves/worldgenoverride.lua"
 }
 
-generate_mod_scripts() {
+generate_mods_scripts() {
   step="[generate: dedicated server mods script]"
   echo "$step Creating the runscript for mod configurations"
-  cp -v "${modlistfile}" "${dir_dstserver}/mods.list"
-  ln -sf "${dir_mods}" "${dir_dst}"/mods
-  dir_mods="${dir_dst}/mods"
-
-  echo "# name: ${cluster_name}_mods.sh
+  cp "${modsfile}" "${dstserverbase}/mods.list"
+  echo "# name: generate_mods_configs.sh
 # description: this file was autogenerated by the https://github.com/jhosvr/dontstarvetogether repository's setup script
 
 echo \"Generating mod config files\"
-modlist=( \$(awk -F',' '{print \$1}' ${dir_dstserver}/mods.list) )
+modlist=( \$(awk -F',' '{print \$1}' ${dstserverbase}/mods.list) )
 
-# Generate dedicated_server_mods_setup file
+# Back up current game mods file
+mv -v \"${modsdir}/dedicated_server_mods_setup.lua\" \"${modsdir}/dedicated_server_mods_setup.lua-\$(date +%Y%m%d-%H%M)\"
+
+# Generate game mods file
 for modnumber in \"\${modlist[@]}\"; do
-  echo \"--ServerModSetup(\\\"\$modnumber\\\")\" >> \"${dir_mods}/dedicated_server_mods_setup.lua\"
+  echo \"--ServerModSetup(\\\"\$modnumber\\\")\" >> \"${modsdir}/dedicated_server_mods_setup.lua\"
 done
 
-# Generate modoverrides file
-echo \"return {\" > ${dir_dstserver}/Master/modoverrides.lua
+# Generate server mods file
+echo \"return {\" > ${dstserverbase}/Master/modoverrides.lua
 for modnumber in \"\${modlist[@]}\"; do
-  echo \"[\\\"workshop-\$modnumber\\\"] = { enabled = true },\" >> ${dir_dstserver}/Master/modoverrides.lua
+  echo \"[\\\"workshop-\$modnumber\\\"] = { enabled = true },\" >> ${dstserverbase}/Master/modoverrides.lua
 done
-echo \"}\" >> ${dir_dstserver}/Master/modoverrides.lua
+echo \"}\" >> ${dstserverbase}/Master/modoverrides.lua
 
-cp -p ${dir_dstserver}/Master/modoverrides.lua ${dir_dstserver}/Caves/modoverrides.lua
-" > "${dir_dstserver}/generate_mod_configs.sh"
-chmod +x "${dir_dstserver}/generate_mod_configs.sh"
+cp -p \"${dstserverbase}/Master/modoverrides.lua\" \"${dstserverbase}/Caves/modoverrides.lua\"
+" > "${dstserverbase}/generate_mods_configs.sh"
+chmod +x "${dstserverbase}/generate_mods_configs.sh"
 }
 
 generate_server_script() {
   scriptName="${cluster_name// /_}"
-  startScript="${HOME}/$scriptName.sh"
+  startScript="${base}/start$scriptName.sh"
   step="[generate: server start script] Generating $scriptName"
   echo "${step}"
 echo "#!/bin/bash
@@ -211,23 +204,23 @@ fileSearch() {
   fi
 }
 
-cd \"$dir_cmd\" || fail \"Missing $dir_cmd directory!\"
+cd \"$steamcmddir\" || fail \"Missing $steamcmddir directory!\"
 
 fileSearch steamcmd.sh
-fileSearch \"${dir_dstserver}/cluster.ini\"
-fileSearch \"${dir_dstserver}/cluster_token.txt\"
-fileSearch \"${dir_dstserver}/Master/server.ini\"
-fileSearch \"${dir_dstserver}/Caves/server.ini\"
+fileSearch \"${dstserverbase}/cluster.ini\"
+fileSearch \"${dstserverbase}/cluster_token.txt\"
+fileSearch \"${dstserverbase}/Master/server.ini\"
+fileSearch \"${dstserverbase}/Caves/server.ini\"
 
 # Update DST via steam cmd
-./steamcmd.sh +force_install_dir \"${dir_dst}\" +login anonymous +app_update 343050 validate +quit
+./steamcmd.sh +force_install_dir \"${dstgamedir}\" +login anonymous +app_update 343050 validate +quit
 
-# Source the mods list and generate necessary mod configs
-${dir_dstserver}/generate_mod_configs.sh
+# generate necessary mod configs
+${dstserverbase}/generate_mod_configs.sh || fail \"could not generate mod config files\"
 
 # Find DST binaries
-fileSearch \"${dir_dstserver}/bin\"
-cd \"${dir_dstserver}/bin\" || fail \"could not find ${dir_dstserver}/bin\"
+fileSearch \"${dstgamedir}/bin\"
+cd \"${dstgamedir}/bin\" || fail \"could not find ${dstserverbase}/bin\"
 
 # Start DST
 run_shared=(./dontstarve_dedicated_server_nullrenderer)
