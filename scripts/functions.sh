@@ -169,7 +169,7 @@ mv -v \"${modsdir}/dedicated_server_mods_setup.lua\" \"${modsdir}/dedicated_serv
 
 # Generate game mods file
 for modnumber in \"\${modlist[@]}\"; do
-  echo \"--ServerModSetup(\\\"\$modnumber\\\")\" >> \"${modsdir}/dedicated_server_mods_setup.lua\"
+  echo \"ServerModSetup(\\\"\$modnumber\\\")\" >> \"${modsdir}/dedicated_server_mods_setup.lua\"
 done
 
 # Generate server mods file
