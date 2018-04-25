@@ -119,8 +119,6 @@ server_port = $server_port
 
 [SHARD]
 is_master = $is_master
-name = $name
-id = $id
 
 [STEAM]
 master_server_port = $master_server_port
@@ -138,7 +136,6 @@ server_port = $server_port
 [SHARD]
 is_master = $is_master
 name = $name
-id = $id
 
 [STEAM]
 master_server_port = $master_server_port
