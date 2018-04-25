@@ -240,3 +240,14 @@ run_shared+=(-monitor_parent_process \$\$)
 chmod +x "${startScript}"
 }
 
+generate_admin_list() {
+  step="[generate: adminlist.txt]"
+  echo "${step} Generating adminlist.txt"
+  source <(sed -n '/\[section: adminlist.txt\]/,/\[section: .*\]/p' "${dstconf}")
+  admins=( $(cat $adminlist) )
+  for admin in $(cat "${admins[@]}"); do
+    echo "${admin}" >> "${dstserverbase}/adminlist.txt"
+  done
+}
+
+

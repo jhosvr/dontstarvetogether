@@ -123,7 +123,9 @@ generate_server_cluster_ini || fail
 generate_master_server_ini || fail
 generate_caves_server_ini || fail
 generate_caves_default_worldgen || fail
+generate_admin_list || fail
 
 # Generate script files
 generate_mods_scripts || fail
 generate_server_script || fail
+
